@@ -203,6 +203,20 @@ async function ensureLogStream(cloudWatchClient, logStreamName) {
   return null;
 }
 
+exports.create_log_stream = async (event, context, callback) => {
+  const body = JSON.parse(event.body);
+  if (!body.meetingId || !body.attendeeId) {
+    return response(400, 'application/json', JSON.stringify({error: 'Need properties: meetingId, attendeeId'}));
+  }
+  const logStreamName = `ChimeSDKMeeting_${body.meetingId.toString()}_${body.attendeeId.toString()}`;
+  const cloudWatchClient = new AWS.CloudWatchLogs({ apiVersion: '2014-03-28' });
+  await cloudWatchClient.createLogStream({
+    logGroupName: logGroupName,
+    logStreamName: logStreamName,
+  }).promise();
+  return response(200, 'application/json', JSON.stringify({}));
+}
+
 function response(statusCode, contentType, body) {
   return {
     statusCode: statusCode,

@@ -248,6 +248,7 @@ export class DemoMeetingApp implements AudioVideoObserver, DeviceChangeObserver,
           }
           await this.openAudioOutputFromSelection();
           this.hideProgress('progress-authenticate');
+          await this.createLogStream();
         }
       );
     });
@@ -670,6 +671,24 @@ export class DemoMeetingApp implements AudioVideoObserver, DeviceChangeObserver,
     } else {
       (document.getElementById('video-downlink-bandwidth') as HTMLSpanElement).innerText =
         'Available Downlink Bandwidth: Unknown';
+    }
+  }
+
+  async createLogStream(): Promise<void> {
+    const body = JSON.stringify({
+      meetingId: this.meetingSession.configuration.meetingId,
+      attendeeId: this.meetingSession.configuration.credentials.attendeeId,
+    });
+    try {
+      const response = await fetch(`${DemoMeetingApp.BASE_URL}create_log_stream`, {
+        method: 'POST',
+        body
+      });
+      if (response.status === 200) {
+        console.error('Log stream created');
+      }
+    } catch (error) {
+      console.error(error.message);
     }
   }
 
